@@ -1,0 +1,62 @@
+Frontend Project Overview
+This application is built as two separate web portals that share a common visual design (vibrant colors, rounded pills, clean look).
+
+1. Customer Application Flow (The Public Menu)
+This application is primarily a simple, one-time journey for ordering food.
+
+Discovery (Scanning): The customer scans a QR Code. The app instantly loads the Menu Screen specific to that food court or stall.
+
+Browsing & Customization: The customer views items organized by Categories. Tapping an item opens the Detail Screen, allowing them to add modifiers (like spiciness, extra cheese) and see the running subtotal.
+
+Checkout & Details: When ready, they go to the Checkout Screen. Here they confirm their order items and specify their fulfillment type:
+
+Dine-In/Takeaway: Standard pickup.
+
+Home Delivery: Requires inputting name, phone number, and address (which the app remembers for next time).
+
+Payment & Submission: They choose a payment method (Cash is the initial priority). After submitting, the order is sent to the kitchen.
+
+Tracking (Real-Time): The app immediately switches to the Token/Status Screen. The customer sees a large Token Number and a Progress Timeline. This timeline updates in real-time as the staff takes action in the kitchen.
+
+Initial State: "Waiting for Payment."
+
+Update 1: "Food is Cooking" (once staff confirms payment).
+
+Update 2: "Ready for Pickup!" (when the food is finished).
+
+2. Owner/Admin Application Flow (The Management Dashboard)
+This application is protected by a login and serves as the staff's control center, relying heavily on real-time data updates.
+
+A. Order Processing
+The main screen is the Order Management Dashboard, organized by tabs:
+
+Incoming/New: Shows new orders. Staff selects an order card, verifies cash payment with the customer, and clicks "Confirm Payment & Start Prep." This action instantly updates the customer's status screen to "Food is Cooking."
+
+Cooking/Pending: Shows active orders being prepared. Staff clicks "Mark as Complete" when the dish is ready.
+
+Ready/Complete: Shows fulfilled orders, which eventually clear out.
+
+Delivery: A filtered version of the orders tab, showing only Home Delivery orders that require dispatch.
+
+B. Inventory Management
+The Inventory Dashboard shows all ingredients and stock levels.
+
+Alerts: Red Alerts prominently appear at the top for any item below the set "low stock threshold."
+
+Stock Adjustment: Staff can quickly add or subtract stock when deliveries arrive.
+
+Smart Deduction (System Trigger): When a staff member moves an order to the "Cooking" or "Complete" status, the system automatically subtracts the required ingredients (based on the recipe) from the inventory.
+
+C. Menu & Recipe Setup
+The Menu Editor is where the digital menu is built and linked to inventory:
+
+Item Creation: Staff creates a dish (price, name, category).
+
+Recipe Linking: When creating/editing a dish, the staff can optionally open a section to define the Recipe, linking the dish to specific Inventory Items (e.g., 1 serving of Biryani requires 200g Rice and 1 Chicken leg).
+
+D. Settings & Configuration
+The Settings Screen allows the owner to control the shop's operational status and view their plan:
+
+Shop Toggles: Simple switches to turn on/off features instantly, like Enable Home Delivery or Accept New Orders.
+
+Billing: Shows the current subscription plan (Free, Student, or Enterprise) and links to billing history.
