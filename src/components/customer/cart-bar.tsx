@@ -24,10 +24,10 @@ export function CartBar({ cart, buttonText, onButtonClick, disabled = false }: C
             <div className="bg-white text-orange-500 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">
               {itemCount}
             </div>
-            <span className="font-semibold">items</span>
+            <span className="">items</span>
           </div>
           <span className="text-white/60">|</span>
-          <span className="font-bold text-lg">₹{total}</span>
+          <span className="font-normal text-lg">BDT {total}</span>
         </div>
         <button
           onClick={onButtonClick}
