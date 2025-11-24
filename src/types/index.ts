@@ -62,3 +62,27 @@ export interface OrderStatusUpdate {
   timestamp: string;
   eta?: string;
 }
+
+// Inventory & Menu Management Types
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: 'kg' | 'pc' | 'ltr' | 'gm';
+  lowStockThreshold: number;
+  image?: string;
+}
+
+export interface Ingredient {
+  inventoryItemId: string;
+  name: string; // cached from inventory for display
+  quantity: number;
+  unit: string; // cached from inventory
+}
+
+export interface MenuItemRecipe extends MenuItem {
+  ingredients: Ingredient[];
+  customizations: Modifier[];
+  isPublic: boolean; // toggle for menu visibility
+}

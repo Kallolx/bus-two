@@ -19,7 +19,7 @@ export function ContentWrapper({ children, className = '' }: ContentWrapperProps
         damping: 30,
         mass: 0.8,
       }}
-      className={`bg-background rounded-t-[2rem] min-h-[calc(100vh-5rem)] ${className}`}
+      className={`bg-background rounded-t-[2rem] min-h-[calc(100vh-5rem)] max-h-[calc(100vh-5rem)] overflow-y-auto ${className}`}
     >
       {children}
     </motion.div>
