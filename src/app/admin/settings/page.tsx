@@ -149,7 +149,7 @@ export default function AdminSettingsPage() {
         <div>
           <h2 className="text-lg font-bold text-gray-900 mb-4">Profile Information</h2>
           
-          <div className="space-y-4">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 inline mr-1" />

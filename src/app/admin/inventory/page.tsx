@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import AdminLayout from '@/components/admin/admin-layout';
 import InventoryItemCard, { InventoryItem } from '@/components/admin/inventory-item';
 import { Plus, Loader2 } from 'lucide-react';
@@ -292,22 +293,26 @@ export default function AdminInventoryPage() {
             {/* Low Stock Alerts */}
             {lowStockItems.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Inventory</h2>
-            <div className="space-y-2">
+            <h2 className="text-md font-semibold tracking-tighter text-black mb-4 flex items-center gap-2">
+              Low Stock Alerts
+            </h2>
+            <div className="space-y-3">
               {lowStockItems.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-full px-6 py-3 shadow-sm border-2 border-red-300 flex items-center justify-between"
+                  className="bg-red-600 rounded-2xl px-5 py-4 shadow-lg flex items-center justify-between border border-red-700 hover:bg-red-700 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                      <span className="text-red-500 font-bold text-sm">!</span>
-                    </div>
-                    <span className="font-bold text-gray-900">{item.name}</span>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src="/images/alert.png"
+                      alt="Low stock alert"
+                      className="w-6 h-6 flex-shrink-0"
+                    />
+                    <span className="font-bold text-md tracking-tighter text-white">{item.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-red-500">{item.quantity} {item.unit}</span>
-                    <span className="text-xs text-gray-400">Left</span>
+                  <div className="flex items-center gap-2 text-white">
+                    <span className="font-bold text-lg">{item.quantity} {item.unit}</span>
+                    <span className="text-xs opacity-90">Left</span>
                   </div>
                 </div>
               ))}

@@ -68,7 +68,7 @@ export default function AdminLayout({ children, stallName }: AdminLayoutProps) {
 
       {/* Floating Bottom Navigation */}
       <nav className="fixed bottom-6 left-4 right-4 z-50 pointer-events-none">
-        <div className="bg-orange-500 rounded-full py-3 px-4 flex items-center justify-around shadow-lg pointer-events-auto">
+        <div className="bg-orange-500 rounded-full py-3 px-4 flex items-center justify-around gap-1 shadow-lg pointer-events-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -77,13 +77,14 @@ export default function AdminLayout({ children, stallName }: AdminLayoutProps) {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex flex-col items-center justify-center rounded-full p-2 transition-all ${
+                className={`flex items-center gap-2 rounded-full px-3 py-2 transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-white text-black w-12 h-12'
-                    : 'text-white hover:bg-gray-100 w-12 h-12'
+                    ? 'bg-white text-black'
+                    : 'text-white hover:bg-orange-600'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {isActive && <span className="text-sm font-medium">{item.label}</span>}
               </Link>
             );
           })}

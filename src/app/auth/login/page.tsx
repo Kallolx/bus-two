@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ContentWrapper } from '@/components/customer/content-wrapper';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +47,11 @@ export default function LoginPage() {
       <header className="fixed top-0 left-0 right-0 z-20 bg-transparent p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-              🍜
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden">
+              <Image src="/images/pizza.png" alt="FoodMaster" width={24} height={24} className="object-contain" />
             </div>
             <div className="text-white">
-              <h1 className="font-bold">XFoodCourt</h1>
+              <h1 className="font-bold">FoodMaster</h1>
               <p className="text-sm opacity-90">Admin Login</p>
             </div>
           </div>
@@ -57,11 +59,14 @@ export default function LoginPage() {
       </header>
 
       {/* Content Area */}
-      <div className="fixed top-20 left-0 right-0 bottom-0">
-        <ContentWrapper className="h-full flex items-center justify-center">
+      <div className="fixed top-30 left-0 right-0 bottom-0">
+        <ContentWrapper className="h-full flex items-start justify-center pt-20 pb-10">
           <div className="w-full max-w-md px-6">
             <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+              <div className="flex items-center justify-center mb-4">
+                <Image src="/images/chef.png" alt="Welcome" width={96} height={96} className="object-contain" />
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-2 tracking-tighter">Welcome Back</h2>
               <p className="text-gray-600">Sign in to access your dashboard</p>
             </div>
 
@@ -98,13 +103,23 @@ export default function LoginPage() {
                   </div>
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                    className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
                     placeholder="Enter your password"
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((s) => !s)}
+                      className="text-gray-500 hover:text-gray-700 p-1"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
