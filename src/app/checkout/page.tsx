@@ -12,6 +12,7 @@ import { CartBar } from '@/components/customer/cart-bar';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const [stallId, setStallId] = useState<string>('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [fulfillmentType, setFulfillmentType] =
     useState<FulfillmentType>('dine-in');
@@ -22,13 +23,37 @@ export default function CheckoutPage() {
   });
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'digital'>('cash');
   const [submitting, setSubmitting] = useState(false);
+  const [stallSettings, setStallSettings] = useState({
+    enable_delivery: true,
+    enable_dine_in: true,
+    enable_digital_payment: false,
+  });
 
   useEffect(() => {
+    const currentStallId = localStorage.getItem('currentStallId') || '';
+    setStallId(currentStallId);
     setCart(cartStorage.get());
     const savedDelivery = deliveryStorage.get();
     if (savedDelivery) {
       setDeliveryInfo(savedDelivery);
     }
+
+    // Fetch stall settings
+    const fetchSettings = async () => {
+      if (!currentStallId) return;
+      
+      try {
+        const response = await fetch(`/api/stall-settings?stallId=${currentStallId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setStallSettings(data);
+        }
+      } catch (error) {
+        console.error('Error fetching stall settings:', error);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
   const subtotal = calculateCartTotal(cart);
@@ -57,6 +82,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    const stallId = localStorage.getItem('currentStallId');
+    if (!stallId) {
+      alert('Session expired. Please go back to menu.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -64,6 +95,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          stallId,
           items: cart,
           fulfillmentType,
           deliveryInfo: fulfillmentType === 'delivery' ? deliveryInfo : undefined,
@@ -85,7 +117,9 @@ export default function CheckoutPage() {
         // Redirect to status page
         router.push(`/status/${data.orderId}`);
       } else {
-        alert('Failed to place order');
+        const errorMsg = data.error || 'Failed to place order';
+        alert(errorMsg + (data.details ? `: ${data.details}` : ''));
+        console.error('Order error:', data);
       }
     } catch (error) {
       console.error('Error placing order:', error);
@@ -103,7 +137,10 @@ export default function CheckoutPage() {
             <div className="text-center">
               <p className="text-xl font-semibold mb-4">Your cart is empty</p>
               <button
-                onClick={() => router.push('/menu/1')}
+                onClick={() => {
+                  const stallId = localStorage.getItem('currentStallId') || '1';
+                  router.push(`/menu/${stallId}`);
+                }}
                 className="bg-orange-500 text-white px-6 py-3 rounded-full hover:bg-orange-600 transition-colors"
               >
                 Browse Menu
@@ -116,7 +153,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <CustomerLayout onMenuClick={() => {}}>
+    <CustomerLayout stallId={stallId} onMenuClick={() => {}}>
       <ContentWrapper className="pb-32">
         {/* Header with Back Button */}
         <div className="sticky top-0 bg-background border-b border-border z-40 p-4 rounded-t-[2rem]">
@@ -153,7 +190,7 @@ export default function CheckoutPage() {
                         {Object.values(item.selectedModifiers).filter(Boolean).join(', ')}
                       </p>
                     )}
-                    <p className="text-orange-500 font-semibold mt-1">₹{item.price}</p>
+                    <p className="text-orange-500 font-semibold mt-1">৳{item.price}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -179,7 +216,14 @@ export default function CheckoutPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">Fulfillment Type</h2>
             <div className="grid grid-cols-3 gap-3">
-              {(['dine-in', 'takeaway', 'delivery'] as FulfillmentType[]).map((type) => (
+              {(['dine-in', 'takeaway', 'delivery'] as FulfillmentType[])
+                .filter((type) => {
+                  // Filter based on stall settings
+                  if (type === 'delivery' && !stallSettings.enable_delivery) return false;
+                  if (type === 'dine-in' && !stallSettings.enable_dine_in) return false;
+                  return true;
+                })
+                .map((type) => (
                 <button
                   key={type}
                   onClick={() => setFulfillmentType(type)}
@@ -235,7 +279,13 @@ export default function CheckoutPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">Payment Method</h2>
             <div className="grid grid-cols-2 gap-3">
-              {(['cash', 'digital'] as const).map((method) => (
+              {(['cash', 'digital'] as const)
+                .filter((method) => {
+                  // Hide digital payment if not enabled
+                  if (method === 'digital' && !stallSettings.enable_digital_payment) return false;
+                  return true;
+                })
+                .map((method) => (
                 <button
                   key={method}
                   onClick={() => setPaymentMethod(method)}
@@ -256,16 +306,16 @@ export default function CheckoutPage() {
             <h2 className="text-lg font-semibold mb-3">Order Summary</h2>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>₹{subtotal}</span>
+              <span>৳{subtotal}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tax (5%)</span>
-              <span>₹{tax}</span>
+              <span>৳{tax}</span>
             </div>
             <div className="border-t border-border pt-2 mt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total</span>
-                <span>₹{total}</span>
+                <span>৳{total}</span>
               </div>
             </div>
           </section>

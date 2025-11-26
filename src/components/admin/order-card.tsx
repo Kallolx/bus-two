@@ -36,7 +36,7 @@ export default function OrderCard({ order, onConfirm, onStatusChange }: OrderCar
             <span className="text-white font-bold text-sm">#{order.token}</span>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm">Order #{order.id.slice(0, 4)}</h3>
+            <h3 className="font-semibold text-gray-900 text-sm">Token #{order.token}</h3>
             <p className="text-xs text-gray-500">{formatTime(order.createdAt)}</p>
           </div>
         </div>

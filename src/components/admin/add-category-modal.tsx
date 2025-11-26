@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Category } from '@/types';
 
@@ -34,8 +35,17 @@ export default function AddCategoryModal({
     color: existingCategory?.color || colorOptions[0].gradient,
   });
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-white rounded-t-[2rem] sm:rounded-3xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-[2rem] sm:rounded-t-3xl z-10">
@@ -116,23 +126,24 @@ export default function AddCategoryModal({
         {/* Action Buttons */}
         <div className="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-100 flex items-center gap-3 z-10">
           {existingCategory && onDelete && (
-            <button
-              onClick={() => onDelete(existingCategory.id)}
-              className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full font-medium hover:shadow-lg transition-all"
-            >
-              Delete
-            </button>
+              <button
+                onClick={() => onDelete(existingCategory.id)}
+                className="px-8 py-3 bg-white border border-red-500 text-red-600 rounded-full font-medium hover:bg-red-50 transition-all"
+              >
+                Delete
+              </button>
           )}
           
           <button
             onClick={() => onSave(formData)}
             disabled={!formData.name}
-            className="flex-1 px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-full font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

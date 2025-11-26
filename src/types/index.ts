@@ -6,6 +6,7 @@ export interface Modifier {
   type: 'toggle' | 'radio' | 'quantity';
   options?: { label: string; price: number }[];
   price?: number;
+  enabled?: boolean; // controls visibility in customer modal
 }
 
 export interface MenuItem {

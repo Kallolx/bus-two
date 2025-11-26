@@ -23,13 +23,30 @@ export default function MenuPage({ params }: { params: Promise<{ stallId: string
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Store stallId in localStorage for checkout
+    localStorage.setItem('currentStallId', stallId);
+
     // Load menu from API
     fetch(`/api/menu?stallId=${stallId}`)
       .then((res) => res.json())
       .then((data) => {
-        setCategories(data.categories);
-        setMenuItems(data.items);
-        setSelectedCategory(data.categories[0]?.id || null);
+        if (data.error) {
+          console.error('API Error:', data.error);
+          setCategories([]);
+          setMenuItems([]);
+          setSelectedCategory(null);
+        } else {
+          setCategories(data.categories || []);
+          setMenuItems(data.items || []);
+          setSelectedCategory(data.categories?.[0]?.id || null);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Fetch error:', error);
+        setCategories([]);
+        setMenuItems([]);
+        setSelectedCategory(null);
         setLoading(false);
       });
 
@@ -60,8 +77,18 @@ export default function MenuPage({ params }: { params: Promise<{ stallId: string
     fetch(`/api/menu?stallId=${stallId}`)
       .then((res) => res.json())
       .then((data) => {
-        setCategories(data.categories);
-        setMenuItems(data.items);
+        if (data.error) {
+          console.error('API Error:', data.error);
+          setCategories([]);
+          setMenuItems([]);
+        } else {
+          setCategories(data.categories || []);
+          setMenuItems(data.items || []);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Fetch error:', error);
         setLoading(false);
       });
   };

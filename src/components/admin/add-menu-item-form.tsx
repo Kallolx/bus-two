@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Plus, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Plus, Upload, DollarSign, FileText, Settings, Package } from 'lucide-react';
 import { MenuItemRecipe, Ingredient, Modifier, InventoryItem } from '@/types';
 import IngredientRow from './ingredient-row';
 
@@ -35,6 +36,12 @@ export default function AddMenuItemForm({
   });
 
   const [selectedInventoryId, setSelectedInventoryId] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const handleAddIngredient = () => {
     if (!selectedInventoryId) return;
@@ -75,6 +82,7 @@ export default function AddMenuItemForm({
       name: '',
       type: 'toggle',
       price: 0,
+      enabled: true,
     };
     setFormData({
       ...formData,
@@ -95,8 +103,10 @@ export default function AddMenuItemForm({
     });
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-white rounded-t-[2rem] sm:rounded-3xl w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-[2rem] sm:rounded-t-3xl z-10">
@@ -116,8 +126,14 @@ export default function AddMenuItemForm({
           {/* Image Upload */}
           <div>
             <label className="flex items-center gap-3 mb-2">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center cursor-pointer hover:shadow-lg transition-shadow">
-                <Upload className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center cursor-pointer hover:shadow-lg transition-shadow border-2 border-dashed border-orange-400 relative">
+                {formData.image ? (
+                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-white" />
+                  </div>
+                )}
               </div>
               <input
                 type="file"
@@ -149,7 +165,9 @@ export default function AddMenuItemForm({
             <h3 className="text-lg font-bold text-gray-900 mb-3">Basic Details</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0" />
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-5 h-5 text-orange-600" />
+                </div>
                 <input
                   type="number"
                   placeholder="Enter product price"
@@ -161,7 +179,9 @@ export default function AddMenuItemForm({
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0" />
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                </div>
                 <input
                   type="text"
                   placeholder="Enter product description"
@@ -178,29 +198,48 @@ export default function AddMenuItemForm({
             <h3 className="text-lg font-bold text-gray-900 mb-3">Order Customizations</h3>
             <div className="space-y-3">
               {formData.customizations?.map((custom, index) => (
-                <div key={custom.id} className="flex items-center justify-between bg-gray-50 rounded-2xl px-4 py-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0" />
+                <div key={custom.id} className="flex items-center justify-between bg-gray-50 rounded-2xl px-3 py-2 gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Settings className="w-4 h-4 text-purple-600" />
+                    </div>
                     <input
                       type="text"
-                      placeholder="Customization name"
+                      placeholder="Name"
                       value={custom.name}
                       onChange={(e) => handleUpdateCustomization(index, 'name', e.target.value)}
-                      className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none"
+                      className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 focus:outline-none text-sm min-w-0"
+                    />
+                    <input
+                      type="number"
+                      placeholder="BDT"
+                      value={custom.price || ''}
+                      onChange={(e) => handleUpdateCustomization(index, 'price', e.target.value ? parseFloat(e.target.value) : 0)}
+                      className="w-16 px-2 py-1 bg-white rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-xs"
+                      min="0"
+                      step="0.01"
                     />
                   </div>
                   
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => handleRemoveCustomization(index)}
-                      className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"
+                      className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center active:scale-90 transition-all"
                     >
                       <X className="w-4 h-4 text-red-500" />
                     </button>
                     <button
-                      className={`relative w-12 h-7 rounded-full transition-colors bg-gradient-to-r from-yellow-400 to-yellow-500`}
+                      type="button"
+                      onClick={() => handleUpdateCustomization(index, 'enabled', !(custom.enabled ?? true))}
+                      className={`relative w-12 h-7 rounded-full transition-all active:scale-95 flex-shrink-0 ${
+                        custom.enabled ?? true ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' : 'bg-gray-300'
+                      }`}
                     >
-                      <div className="absolute top-1 right-1 w-5 h-5 bg-white rounded-full shadow-sm" />
+                      <div
+                        className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${
+                          custom.enabled ?? true ? 'right-1' : 'left-1'
+                        }`}
+                      />
                     </button>
                   </div>
                 </div>
@@ -208,7 +247,7 @@ export default function AddMenuItemForm({
               
               <button
                 onClick={handleAddCustomization}
-                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all"
               >
                 Add +
               </button>
@@ -253,7 +292,7 @@ export default function AddMenuItemForm({
                 <button
                   onClick={handleAddIngredient}
                   disabled={!selectedInventoryId}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg active:scale-95 transition-all"
                 >
                   Add
                 </button>
@@ -262,7 +301,7 @@ export default function AddMenuItemForm({
               <button
                 onClick={handleAddIngredient}
                 disabled={!selectedInventoryId}
-                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 font-medium hover:border-gray-400 hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add +
               </button>
@@ -273,7 +312,9 @@ export default function AddMenuItemForm({
           <div className="bg-gray-50 rounded-2xl px-4 py-3">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3 flex-1">
-                <div className="w-6 h-6 bg-gray-300 rounded-full flex-shrink-0 mt-0.5" />
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Package className="w-4 h-4 text-green-600" />
+                </div>
                 <div>
                   <p className="font-medium text-gray-900">Enable inventory tracking for this item</p>
                   <p className="text-sm text-gray-500 mt-0.5">Auto deducts items and removes form inventory</p>
@@ -282,7 +323,7 @@ export default function AddMenuItemForm({
               
               <button
                 onClick={() => setFormData({ ...formData, isPublic: !formData.isPublic })}
-                className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${
+                className={`relative w-12 h-7 rounded-full transition-all active:scale-95 flex-shrink-0 ${
                   formData.isPublic ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' : 'bg-gray-300'
                 }`}
               >
@@ -301,7 +342,7 @@ export default function AddMenuItemForm({
           {existingItem && onDelete && (
             <button
               onClick={() => onDelete(existingItem.id)}
-              className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full font-medium hover:shadow-lg transition-all"
+              className="px-8 py-3 bg-white border border-red-500 text-red-600 rounded-full font-medium hover:bg-red-50 active:scale-95 transition-all"
             >
               Delete
             </button>
@@ -309,12 +350,13 @@ export default function AddMenuItemForm({
           
           <button
             onClick={() => onSave(formData)}
-            className="flex-1 px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-full font-medium hover:shadow-lg transition-all"
+            className="flex-1 px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-medium hover:shadow-lg active:scale-95 transition-all"
           >
             Save
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

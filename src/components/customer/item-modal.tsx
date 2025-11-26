@@ -61,14 +61,14 @@ export function ItemModal({ item, onClose, onAddToCart }: ItemModalProps) {
               src={item.image}
               alt={item.name}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 500px"
             />
           </div>
 
           {/* Text Section with Light Gray Background */}
           <div className="bg-gray-100 rounded-3xl p-4 mb-6">
-            <h2 className="text-xl font-bold mb-2">{item.name}</h2>
+            <h2 className="text-2xl tracking-tighter font-bold mb-2">{item.name}</h2>
             <p className="text-muted-foreground text-sm mb-3">
               {item.description}
             </p>
@@ -76,7 +76,9 @@ export function ItemModal({ item, onClose, onAddToCart }: ItemModalProps) {
             {/* Modifiers - Toggle Switches */}
             {item.modifiers && item.modifiers.length > 0 && (
               <div className="space-y-3 mb-4">
-                {item.modifiers.map((modifier) => (
+                {item.modifiers
+                  .filter((modifier) => modifier.enabled !== false)
+                  .map((modifier) => (
                   <ModifierControl
                     key={modifier.id}
                     modifier={modifier}
@@ -158,15 +160,13 @@ function ModifierControl({
         <div className="flex items-center gap-3">
           {/* Light Gray Circle Icon */}
           <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0" />
-          <div>
-            <span className="font-medium">{modifier.name}</span>
-            {modifier.price && modifier.price > 0 && (
-              <span className="text-muted-foreground ml-2 text-sm">
-                +₹{modifier.price}
-              </span>
-            )}
-          </div>
+          <span className="font-medium">{modifier.name}</span>
         </div>
+        {modifier.price && modifier.price > 0 && (
+          <span className="text-muted-foreground text-sm">
+            +৳{modifier.price}
+          </span>
+        )}
         {/* Toggle Switch */}
         <div
           className={`w-12 h-7 rounded-full transition-colors ${
@@ -203,7 +203,7 @@ function ModifierControl({
             <div className="flex items-center gap-3">
               {option.price > 0 && (
                 <span className="text-muted-foreground text-sm">
-                  +₹{option.price}
+                  +৳{option.price}
                 </span>
               )}
               {/* Radio Button */}

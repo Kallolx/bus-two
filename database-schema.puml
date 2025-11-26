@@ -1,0 +1,194 @@
+@startuml FoodMaster Database Schema
+
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+!define table(x) entity x << (T, #FFAAAA) >>
+
+' Define color scheme
+skinparam backgroundColor #FFFFFF
+skinparam entity {
+  BackgroundColor #E8F4F8
+  BorderColor #2C3E50
+  FontColor #2C3E50
+  FontSize 11
+}
+
+skinparam class {
+  BackgroundColor #E8F4F8
+  BorderColor #2C3E50
+  ArrowColor #34495E
+  FontSize 11
+}
+
+entity "users" as users {
+  primary_key(id) : uuid
+  --
+  column(email) : text <<unique>>
+  column(full_name) : text
+  column(stall_name) : text
+  column(stall_description) : text
+  column(stall_logo_url) : text
+  column(phone) : text
+  column(address) : text
+  column(is_active) : boolean
+  column(enable_digital_menu) : boolean
+  column(enable_delivery) : boolean
+  column(enable_dine_in) : boolean
+  column(accept_new_orders) : boolean
+  column(enable_digital_payment) : boolean
+  column(created_at) : timestamp
+  column(updated_at) : timestamp
+  --
+  Foreign Key: auth.users(id)
+}
+
+entity "categories" as categories {
+  primary_key(id) : uuid
+  --
+  foreign_key(user_id) : uuid
+  column(name) : text
+  column(color) : text
+  column(sort_order) : integer
+  column(created_at) : timestamp
+  column(updated_at) : timestamp
+}
+
+entity "menu_items" as menu_items {
+  primary_key(id) : uuid
+  --
+  foreign_key(user_id) : uuid
+  foreign_key(category_id) : uuid
+  column(name) : text
+  column(description) : text
+  column(price) : numeric
+  column(image_url) : text
+  column(is_available) : boolean
+  column(is_public) : boolean
+  column(sort_order) : integer
+  column(created_at) : timestamp
+  column(updated_at) : timestamp
+}
+
+entity "modifiers" as modifiers {
+  primary_key(id) : uuid
+  --
+  foreign_key(menu_item_id) : uuid
+  column(name) : text
+  column(type) : text
+  column(price) : numeric
+  column(created_at) : timestamp
+  --
+  CHECK: type IN ('toggle', 'radio', 'quantity')
+}
+
+entity "modifier_options" as modifier_options {
+  primary_key(id) : uuid
+  --
+  foreign_key(modifier_id) : uuid
+  column(label) : text
+  column(price) : numeric
+  column(created_at) : timestamp
+}
+
+entity "inventory_items" as inventory_items {
+  primary_key(id) : uuid
+  --
+  foreign_key(user_id) : uuid
+  column(name) : text
+  column(quantity) : numeric
+  column(unit) : text
+  column(low_stock_threshold) : numeric
+  column(image_url) : text
+  column(created_at) : timestamp
+  column(updated_at) : timestamp
+  --
+  CHECK: unit IN ('kg', 'pc', 'ltr', 'gm')
+}
+
+entity "menu_item_ingredients" as menu_item_ingredients {
+  primary_key(id) : uuid
+  --
+  foreign_key(menu_item_id) : uuid
+  foreign_key(inventory_item_id) : uuid
+  column(quantity) : numeric
+  column(created_at) : timestamp
+}
+
+entity "orders" as orders {
+  primary_key(id) : uuid
+  --
+  foreign_key(user_id) : uuid
+  column(token) : integer
+  column(total) : numeric
+  column(fulfillment_type) : text
+  column(payment_method) : text
+  column(status) : text
+  column(customer_name) : text
+  column(customer_phone) : text
+  column(delivery_address) : text
+  column(notes) : text
+  column(created_at) : timestamp
+  column(updated_at) : timestamp
+  --
+  CHECK: fulfillment_type IN ('dine-in', 'takeaway', 'delivery')
+  CHECK: payment_method IN ('cash', 'digital')
+  CHECK: status IN ('waiting', 'cooking', 'ready', 'completed', 'cancelled')
+}
+
+entity "order_items" as order_items {
+  primary_key(id) : uuid
+  --
+  foreign_key(order_id) : uuid
+  foreign_key(menu_item_id) : uuid
+  column(menu_item_name) : text
+  column(menu_item_price) : numeric
+  column(quantity) : integer
+  column(selected_modifiers) : jsonb
+  column(subtotal) : numeric
+  column(created_at) : timestamp
+}
+
+' Relationships
+users ||--o{ categories : "owns"
+users ||--o{ menu_items : "manages"
+users ||--o{ inventory_items : "tracks"
+users ||--o{ orders : "receives"
+
+categories ||--o{ menu_items : "categorizes"
+
+menu_items ||--o{ modifiers : "has"
+menu_items ||--o{ menu_item_ingredients : "requires"
+menu_items ||--o{ order_items : "ordered_as"
+
+modifiers ||--o{ modifier_options : "contains"
+
+inventory_items ||--o{ menu_item_ingredients : "used_in"
+
+orders ||--o{ order_items : "contains"
+
+note right of users
+  <b>Central User/Stall Entity</b>
+  Contains stall owner info and
+  operational settings for the food stall
+end note
+
+note right of menu_items
+  <b>Menu Management</b>
+  Items can be made public/private
+  and available/unavailable
+end note
+
+note right of orders
+  <b>Order Flow</b>
+  Token: 3-digit daily unique number
+  Status: waiting → cooking → ready → completed
+end note
+
+note right of inventory_items
+  <b>Inventory Tracking</b>
+  Auto-deduction when orders are placed
+  based on menu_item_ingredients
+end note
+
+@enduml
